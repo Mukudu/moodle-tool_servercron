@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/servercron/db" VERSION="20120427" COMMENT="XMLDB file for Moodle local/servercron"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="local_servercron" COMMENT="Table server Cron - saves cron entries so we can recreate cron file whenever required">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="minute"/>
+        <FIELD NAME="minute" TYPE="char" LENGTH="180" NOTNULL="true" DEFAULT="-1" SEQUENCE="false" COMMENT="Store minutes 1-59 or -1 which means any minute default -1" PREVIOUS="id" NEXT="hour"/>
+        <FIELD NAME="hour" TYPE="char" LENGTH="75" NOTNULL="true" DEFAULT="-1" SEQUENCE="false" COMMENT="Saves the hour bit 0 - 23 and -1 is every hour default -1" PREVIOUS="minute" NEXT="day"/>
+        <FIELD NAME="day" TYPE="char" LENGTH="96" NOTNULL="true" DEFAULT="-1" SEQUENCE="false" COMMENT="day of the month (1 - 31) with -1 meaning every day - default -1" PREVIOUS="hour" NEXT="month"/>
+        <FIELD NAME="month" TYPE="char" LENGTH="39" NOTNULL="true" DEFAULT="-1" SEQUENCE="false" COMMENT="month (1 - 12) OR jan,feb,mar,apr ... -1 = every month and is the default" PREVIOUS="day" NEXT="wday"/>
+        <FIELD NAME="wday" TYPE="char" LENGTH="24" NOTNULL="true" DEFAULT="-1" SEQUENCE="false" COMMENT="day of week (0 - 6) (Sunday=0 or 7)  OR sun,mon,tue,wed,thu,fri,sat default -1 every day" PREVIOUS="month" NEXT="commandline"/>
+        <FIELD NAME="commandline" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="commandline to be executed" PREVIOUS="wday" NEXT="active"/>
+        <FIELD NAME="active" TYPE="int" LENGTH="1" NOTNULL="false" UNSIGNED="true" DEFAULT="1" SEQUENCE="false" COMMENT="whether the cron job should be added to the cron file - stops the cron when required" PREVIOUS="commandline"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="active" UNIQUE="false" FIELDS="active"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>
