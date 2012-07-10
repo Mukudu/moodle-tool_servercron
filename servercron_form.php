@@ -21,7 +21,7 @@
  *
  * @package    local_servercron
  * @copyright  2012 Nottingham University
- * @author     Benjamin Ellis - benjamin.ellis@nottingham.ac.uk
+ * @author     Benjamin Ellis <benjamin.c.ellis@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  */
@@ -53,65 +53,62 @@ class servercron_form extends moodleform {
         if (count($existing)) {
             //set up heading for the table
             $row = html_writer::tag('th', get_string('minuteprompt', 'local_servercron'),
-                array('width'=>'5%', 'style'=>'padding:15px; text-align:right'));
+                array('width' => '5%', 'style' => 'padding:5px; text-align:right'));
 
             $row .= html_writer::tag('th', get_string('hourprompt', 'local_servercron'),
-                array('width'=>'5%', 'style'=>'padding:15px; text-align:right'));
+                array('width' => '5%', 'style' => 'padding:5px; text-align:right'));
 
             $row .= html_writer::tag('th', get_string('dayprompt', 'local_servercron'),
-                array('width'=>'5%', 'style'=>'padding:15px; text-align:right'));
+                array('width' => '5%', 'style' => 'padding:5px; text-align:right'));
 
             $row .= html_writer::tag('th', get_string('monthprompt', 'local_servercron'),
-                array('width'=>'5%', 'style'=>'padding:15px; text-align:right'));
+                array('width' => '5%', 'style' => 'padding:5px; text-align:right'));
 
             $row .= html_writer::tag('th', get_string('wdayprompt', 'local_servercron'),
-                array('width'=>'5%', 'style'=>'padding:15px; text-align:right'));
+                array('width' => '5%', 'style' => 'padding:5px; text-align:right'));
 
             $row .= html_writer::tag('th', get_string('commandprompt', 'local_servercron'),
-                array('width'=>'30%', 'style'=>'padding:15px; text-align:center'));
+                array('width' => '30%', 'style' => 'padding:5px; text-align:center'));
 
             $row .= html_writer::tag('th', get_string('actionsprompt', 'local_servercron'),
-                array('style'=>'padding:15px; text-align:center', 'colspan'=>3));
+                array('style' => 'padding:5px; text-align:center'));
 
-            $row = html_writer::tag('tr', $row, array('width'=>'100%'));
+            $row = html_writer::tag('tr', $row, array('width' => '100%'));
             $rows .= $row ."\n";
 
             foreach ($existing as $exists) {
                 // make up the edit line
-                $row = html_writer::tag('td', $exists->minute,  array('style'=>'text-align: right'));
-                $row .= html_writer::tag('td', $exists->hour,  array('style'=>'text-align: right'));
-                $row .= html_writer::tag('td', $exists->day,  array('style'=>'text-align: right'));
-                $row .= html_writer::tag('td', $exists->month,  array('style'=>'text-align: right'));
-                $row .= html_writer::tag('td', $exists->wday,  array('style'=>'text-align: right'));
+                $row = html_writer::tag('td', $exists->minute,  array('style' => 'text-align: right'));
+                $row .= html_writer::tag('td', $exists->hour,  array('style' => 'text-align: right'));
+                $row .= html_writer::tag('td', $exists->day,  array('style' => 'text-align: right'));
+                $row .= html_writer::tag('td', $exists->month,  array('style' => 'text-align: right'));
+                $row .= html_writer::tag('td', $exists->wday,  array('style' => 'text-align: right'));
                 $row .= html_writer::tag('td', $exists->commandline);
 
                 //editing links
-                if ($exists->active) {
-                    $mess = get_string('editactivenegative', 'local_servercron');
-                } else {
-                    $mess = get_string('editactivepositive', 'local_servercron');
-                }
-                $row .= html_writer::tag('td', html_writer::tag('a', '['. $mess .']',
-                    array('id'=>'svrcrn'.$exists->id,
-                        'href' => $PAGE->url."?action=changestat&cronjobid=".$exists->id ."&status=".$exists->active)),
-                    array('style'=>'padding:15px'));
+                $row .= html_writer::start_tag('td', array('style' => 'padding:5px; text-align:center'));
 
-                $row .= html_writer::tag('td', html_writer::tag('a', '['.get_string('editcronjob', 'local_servercron').']',
-                    array('id'=>'svrcrn'.$exists->id,
-                        'href' => $PAGE->url."?action=edit&cronjobid=".$exists->id)),
-                    array('style'=>'padding:15px'));
+                $row .= html_writer::tag('a', '['.get_string('editcronjob', 'local_servercron').']',
+                    array('id' => 'svrcrn'.$exists->id,
+                        'href' => $PAGE->url."?action=edit&cronjobid=".$exists->id));
 
-                $row .= html_writer::tag('td', html_writer::tag('a', '['.get_string('deletecronjob', 'local_servercron').']',
-                    array('id'=>'svrcrn'.$exists->id, 'href' =>  $PAGE->url."?action=delete&cronjobid=".$exists->id)),
-                    array('style'=>'padding:15px'));
+                $row .= '&nbsp;&nbsp;';
+
+                $row .= html_writer::tag('a', '['.get_string('deletecronjob', 'local_servercron').']',
+                    array('id' => 'svrcrn'.$exists->id, 'href' =>  $PAGE->url."?action=delete&cronjobid=".$exists->id));
+
+                $row .= html_writer::end_tag('td');
 
                 $row = html_writer::tag('tr', $row);
                 $rows .= $row ."\n";
             }
 
-            $mform->addElement('html', html_writer::tag('table', $rows, array('width'=>'100%')));          //enclose in table
+            $mform->addElement('html', html_writer::tag('table', $rows, array('width' => '100%')));          //enclose in table
         } else {
-            $mform->addElement('html', html_writer::tag('p', get_string('noexistingcrons', 'local_servercron')));
+            //if no rec id specified - then we have no records
+            if (!$this->_customdata['cronjobid']) {
+                $mform->addElement('html', html_writer::tag('p', get_string('noexistingcrons', 'local_servercron')));
+            }
         }
 
         $editing = false;           //deafult not editing existing record
@@ -131,9 +128,9 @@ class servercron_form extends moodleform {
         }
 
         //hidden field
-        $mform->addElement('hidden', 'cronjobid', $this->_customdata['cronjobid'], array('id'=>'id_cronjobid'));//0=new
+        $mform->addElement('hidden', 'cronjobid', $this->_customdata['cronjobid'], array('id' => 'id_cronjobid'));//0=new
         // default action is save - have to check for cancel in php code to avoid reliance on JS
-        $mform->addElement('hidden', 'action', 'save', array('id'=>'id_action'));
+        $mform->addElement('hidden', 'action', 'save', array('id' => 'id_action'));
 
         $timingdets=array();
 
@@ -197,7 +194,7 @@ class servercron_form extends moodleform {
         $mform->addGroup($timingdets, 'timings', get_string('timingsprompt', 'local_servercron'), array(' '), false);
 
         //servercron title
-        $mform->addElement('text', 'commandline', get_string('commandprompt', 'local_servercron'), array('size'=>100));
+        $mform->addElement('text', 'commandline', get_string('commandprompt', 'local_servercron'), array('size' => 100));
         $mform->setDefault('commandline', $this->_customdata['commandline']);
         $mform->setType('commandline', PARAM_TEXT);
 
@@ -214,4 +211,5 @@ class servercron_form extends moodleform {
 
     }
 }
+
 /* ?> */

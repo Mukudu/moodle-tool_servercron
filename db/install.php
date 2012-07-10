@@ -18,21 +18,20 @@
  * Server Cron - installation script
  *
  * Plugin to manage the http cron jobs for moodle
- * This script is run at installation and sets up the plugin fo use
+ * This script is run at installation and sets up the plugin for use
  *
  * @package    local_servercron
  * @copyright  2012 Nottingham University
- * @author     Benjamin Ellis - benjamin.ellis@nottingham.ac.uk
+ * @author     Benjamin Ellis <benjamin.c.ellis@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * @throws $moodle_exception
  */
 
-
 /**
  * xmldb_local_servercron_install
  * Code called directly when the plugin is installed for the 1st time
- * checks for insttaltion on windows and throws exception
+ * checks for installation on windows and throws exception via print_error
  *
  * @throws moodleexection.
  * @return null
@@ -42,35 +41,7 @@ function xmldb_local_servercron_install() {
 
     //check that we are on a suitable OS
     if (stripos(php_uname('s'), 'windows') !== false) {              //no windows
-        throw new moodle_exception(get_string('wrong_os', 'local_servercron', php_uname('s')), 'local_servercron');
-        //die(get_string('wrong_os', 'local_servercron', php_uname('s')));  //vicious way to do this no menus to continue
-
-        //maybe drop the tables??
-    }
-
-    // read any existing crons and add to database
-    $cmd = exec('which crontab') . ' -l';
-    exec($cmd, $cronlines, $result);
-    foreach ($cronlines as $cronline) {
-        if (!(preg_match('/^#/', $cronline))) { //if not a comment
-            $cronline = str_replace('*', '-1', $cronline);
-            $xdata = preg_split('/\s+/', $cronline);
-            $adata['commandline'] = implode(' ', array_slice($xdata, 5));
-            //would have though there was a quicker way to do this - too manyhours spent already and KISS
-            $adata['minute'] = $xdata[0];
-            $adata['hour'] = $xdata[1];
-            $adata['day'] = $xdata[2];
-            $adata['month'] = $xdata[3];
-            $adata['wday'] = $xdata[4];
-            //, $adata['commandline']) = $xdata[5];
-            //turn into an object
-            $data = (object) $adata;
-            //write to database
-            if (!$DB->insert_record('local_servercron', $data)) {
-                throw new moodle_exception('No Good database', 'local_servercron');
-                break;
-            }
-        }
+        print_error('wrong_os', 'local_servercron', new moodle_url('/'), php_uname('s'));
     }
 }
 

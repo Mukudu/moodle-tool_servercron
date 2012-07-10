@@ -15,16 +15,16 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Server Cron
+ * Server Cron main script file
  *
- * Plugin to manage the http cron jobs for moodle
+ * Plugin to manage the http cron jobs for Moodle
  *
  * @package    local_servercron
  * @copyright  2012 Nottingham University
- * @author     Benjamin Ellis - benjamin.ellis@nottingham.ac.uk
+ * @author     Benjamin Ellis <benjamin.c.ellis@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
- * @throws $moodle_exception
+ * @throws $moodle_exception via print_error
  */
 
 require('../../config.php');            //this works everytime - the one in the coding guide does not if moodle is not in the root
@@ -32,7 +32,7 @@ require('../../config.php');            //this works everytime - the one in the 
 
 //check that we are on a suitable OS
 if (stripos(php_uname('s'), 'windows') !== false) {              //no windows
-    throw new moodle_exception(get_string('wrong_os', 'local_servercron', php_uname('s')), 'local_servercron');
+    print_error('wrong_os', 'local_servercron', new moodle_url('/'), php_uname('s'));
 }
 
 require_once('servercron_form.php');
@@ -55,7 +55,6 @@ $theaction = optional_param('action', '', PARAM_ALPHA);     //have we been calle
 
 // script parameters - stuff saved to $formdata is used by the admin form
 $formdata = array();
-//the rest of this script runs only if no action parameter has been specified.....
 $formdata['minutes'] = servercron_getminutes();
 $formdata['hours'] = servercron_gethours();
 $formdata['days'] = servercron_getdays();
@@ -63,9 +62,47 @@ $formdata['months'] = servercron_getmonths();
 $formdata['wdays'] = servercron_getweekdays();
 
 //get the existing records ready for editing
-$formdata['existingrecs'] = $DB->get_records('local_servercron');
+$formdata['existingrecs'] = array();
+$linectr = 0;
+$cmd = exec('which crontab') . ' -l';
+exec($cmd, $cronlines, $result);
+
+if ($result !== 0) {          //we have an error - 0 = success anything else is error
+    print_error('nocronlines', 'local_servercron', $PAGE->url->out(), null, $result);       //this will throw exception
+} else {
+    foreach ($cronlines as $cronline) {
+        if (!(preg_match('/^#/', $cronline))) { //if not a comment
+            $linectr++;
+            $xdata = preg_split('/\s+/', $cronline);
+            $adata['id'] = $linectr;
+            //would have though there was a quicker way to do this - too manyhours spent already and KISS
+            $adata['minute'] = $xdata[0];
+            $adata['hour'] = $xdata[1];
+            $adata['day'] = $xdata[2];
+            $adata['month'] = $xdata[3];
+            $adata['wday'] = $xdata[4];
+            $adata['commandline'] = implode(' ', array_slice($xdata, 5));       //take the rest of the line
+            //turn into an object
+            $formdata['existingrecs'][] = (object) $adata;
+        }
+    }
+}
 
 if ($theaction) {
+    // if we have an action - it would be a good idea to back the current crons - juts in case
+    // crons can be restored from that backup manually
+    if ($fh = fopen($CFG->dataroot . '/cron.backup', 'wb')) {
+        //this could be empty
+        foreach ($formdata['existingrecs'] as $bup) {
+            $bup = (array) $bup;
+            fwrite($fh, implode("\t", array_values($bup)). "\n");
+        }
+        fclose($fh);
+    } else {
+        //$noerror = servercron_error(get_string('bkupfilefail', 'local_servercron') . " - $CFG->dataroot");
+        print_error('bkupfilefail', 'local_servercron', $PAGE->url->out(), null, $result);      //another possibe exception
+    }
+
     if ($theaction == 'edit') {
         //fill in the form with
         if ($cronjobid) {
@@ -103,19 +140,13 @@ if ($theaction) {
         if (optional_param('save', '', PARAM_TEXT)) {
             $data = new StdClass();
 
-            $data->active = 1;          //always active by default
-            if ($cronjobid) {
-                $data->id = $cronjobid;
-            }
-
-            //required data
-            $data->commandline = required_param('commandline', PARAM_TEXT);
+            //required data - this is order specific
             $data->minute =  required_param('minute', PARAM_TEXT);
             $data->hour =  required_param('hour', PARAM_TEXT);
             $data->day = required_param('day', PARAM_TEXT);
             $data->month = required_param('month', PARAM_TEXT);
             $data->wday = required_param('wday', PARAM_TEXT);
-
+            $data->commandline = required_param('commandline', PARAM_TEXT);
 
             //verify the timings data that has been submitted
             if (($ret = servercron_checktimeinput($data->minute, 0, 59, PARAM_INT)) !== true) {
@@ -148,16 +179,20 @@ if ($theaction) {
                 $data->wday = implode(', ', $data->wday);
             }
 
+            if ($cronjobid) {
+                foreach ($formdata['existingrecs'] as $rec) {
+                    if ($rec->id == $cronjobid) {
+                        $rec = $data;           //replace the current record
+                        break;
+                    }
+                }
+            } else { //else this is a new record and will go to the bottom of the file
+                $formdata['existingrecs'][] = $data;
+            }
 
             //save to database or complain about error
             if (!$paramerror) {
-                //save in database
-                if ($cronjobid) {
-                    $DB->update_record('local_servercron', $data);
-                } else {
-                    $DB->insert_record('local_servercron', $data);
-                }
-                if (!servercron_savecron()) {           //attempt to install the cron jobs
+                if (!servercron_savecron($formdata['existingrecs'])) {           //attempt to install the cron jobs
                     $paramerror = get_string('cronsaveerror', 'local_servercron');
                 }
             }
@@ -165,28 +200,23 @@ if ($theaction) {
 
     } else if ($theaction == 'delete') {
         if ($cronjobid) {
-            $DB->delete_records('local_servercron', array('id'=>$cronjobid));
-            if (!servercron_savecron()) {           //attempt to install the cron jobs
-                $paramerror = get_string('cronsaveerror', 'local_servercron');
+            //$DB->delete_records('local_servercron', array('id' => $cronjobid));
+            $newrecs = array();
+            foreach ($formdata['existingrecs'] as $rec) {
+                if ($rec->id != $cronjobid) {
+                    //unset($rec);         //delete it  this does not work
+                    //$rec = null;         //nor does this
+                    //break;
+                    $newrecs[] = $rec;
+                }
             }
-        } else {
-            $paramerror = get_string('croniderror', 'local_servercron');
-        }
-    } else if ($theaction == 'changestat') {
-        if ($cronjobid) {
-            $data = new StdClass();
-            $data->id = $cronjobid;
-            $data->active = required_param('status', PARAM_INT);            //only required in this instance
-            $data->active = $data->active ? 0 : 1;
-            $DB->update_record('local_servercron', $data);
-            if (!servercron_savecron()) {           //attempt to install the cron jobs
+            if (!servercron_savecron($newrecs)) {           //attempt to install the cron jobs
                 $paramerror = get_string('cronsaveerror', 'local_servercron');
             }
         } else {
             $paramerror = get_string('croniderror', 'local_servercron');
         }
     }
-    //$paramerror = 'Get Lost, Ben';
 
     // browser is remembering inputs and so we have to redirect to clear the form fields and the query strings
     if (!$paramerror && ($theaction != 'edit')) {
@@ -194,9 +224,9 @@ if ($theaction) {
     } else {  //else we go back to the form and display the error
         $formdata['error'] = $paramerror;
     }
-
 }
 
+//the rest of this script runs only if no action parameter has been specified.....
 if (!isset($formdata['cronjobid'])) {       //handle new crons
     $formdata['cronjobid'] = 0;
 }
@@ -231,28 +261,28 @@ echo $OUTPUT->footer();
 /**
  * function to actually create the cron - this does not work on Windows!!!!
  *
- * @throws moodleexection.
+ * @param array $newcrons - the new cron jobs required
  * @return bool $noerror - false on error
  */
-function servercron_savecron() {
-    global $DB;         //why? why???
+function servercron_savecron(array $newcrons) {
+    global $CFG;
     $noerror = true;
 
     //find a temporary writeable directory for our cronfile
     if ($temp_file = tempnam(sys_get_temp_dir(), 'moodlecron')) {
         if ($cronfile = fopen($temp_file, 'wb')) {
-            //error_log("++++++++ Temp file is $temp_file");
-            $activecrons = $DB->get_records('local_servercron', array('active'=>1), null,
-                    'minute, hour, day, month, wday, commandline');     //don't care about order etc
 
-            if (count($activecrons)) {
+            if (count($newcrons)) {
                 fwrite($cronfile, '#' . get_string('file_warning', 'local_servercron') . "\n");  //write warning notice
             }
 
-            foreach ($activecrons as $cronjob) {
+            foreach ($newcrons as $cronjob) {
+                if (isset($cronjob->id)) {          //cron file won't like this
+                    unset($cronjob->id);
+                }
                 $cronjob = (array) $cronjob;
                 $cronline = implode("\t", array_values($cronjob));
-                $cronline = str_replace(-1, '*', $cronline);
+                $cronline = str_replace(-1, '*', $cronline);            //make all -1 into *s
                 fwrite($cronfile, "$cronline\n");
             }
             fclose($cronfile);
@@ -261,22 +291,33 @@ function servercron_savecron() {
             exec($cmd, $theoutput, $result);
 
             if ($result) {          //there is an error condition - 0 is successful completion unless its perl ;)
-                $noerror = false;
-                //error_log('Cron Job Update failed - ' . print_r($theoutput, true));
+                $noerror = servercron_error(get_string('croninstallfail', 'local_servercron') . ' - ' . $theoutput);
             }
             unlink($temp_file);
 
         } else {
-            //error_log("File $tempfile not opened");
-            $noerror = false;
+            $noerror = servercron_error(get_string('tmpfilefail', 'local_servercron'));
         }
     } else {
-        //error_log("Cannot open a temporary file");
-        $noerror =  false;
+        $noerror = servercron_error(get_string('tmpfilecreatefail', 'local_servercron'));
     }
 
     return $noerror;
 }
+
+
+/**
+ * function to write debugging information and set $noerror to false
+ *
+ * @param string $str the error message
+ * @return bool always false to set $noerror in calling routine
+ *
+ */
+function servercron_error(string $str) {
+    debugging($str, DEBUG_DEVELOPER);
+    return false;
+}
+
 
 /**
  * function to check the timing inputs (only -1 or integers allowed)
@@ -309,11 +350,11 @@ function servercron_checktimeinput($tarray, $min, $max, $type) {
                 (int) $tval;
                 if ($tval = clean_param($tval, $type)) {   //check our input
                     if (!($tval >= $min) && ($tval <= $max)) {
-                        $errstr = 'Value is not allowable range';
+                        $errstr = get_string('valueoutsiderange', 'local_servercron');
                         break;
                     }
                 } else {
-                    $errstr = 'Value does not appear to be a number';
+                    $errstr = get_string('valuenotnumber', 'local_servercron');
                     break;
                 }
             }
@@ -325,6 +366,7 @@ function servercron_checktimeinput($tarray, $min, $max, $type) {
     }
     return true;
 }
+
 
 /*
     dropdown fillers start here

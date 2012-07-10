@@ -15,20 +15,28 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Server Cron
- *
  * Plugin to manage the http cron jobs for moodle - english language file
  *
  * @package    local_servercron
  * @copyright  2012 Nottingham University
- * @author     Benjamin Ellis - benjamin.ellis@nottingham.ac.uk
+ * @author     Benjamin Ellis <benjamin.c.ellis@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['pluginname'] = 'Server Cron Jobs';
-$string['pluginname_desc'] = 'Plugin to manage the http cron jobs for moodle.';
+$string['pluginname_desc'] = "Plugin to manage the webserver's cron jobs for Moodle.";
 
 $string['wrong_os'] = 'This plugin does not work with your Operating System ({$a})';
+
+$string['valueoutsiderange'] = 'Value is not in allowable range';
+$string['valuenotnumber'] = 'Value does not appear to be a number';
+
+$string['croninstallfail'] = 'Cron Job Update failed';
+$string['tmpfilefail'] = 'Temp File could not be opened';
+$string['tmpfilecreatefail'] = 'Cannot create a temporary file';
+$string['bkupfilefail'] = 'Cannot make backup file';
+$string['nocronlines'] = 'Failed to get current cron lines';
+
 $string['file_warning'] = 'This cron file is being maintained by Moodle - do not edit manually';
 
 $string['servercronpagetitle'] = 'Server Cron Job Management';

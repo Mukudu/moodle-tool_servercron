@@ -10,9 +10,9 @@ You must have access to the server containing Moodle. This can be direct access,
 
 INSTALLATION
 ============
-1.  Latest version of the zipped file for this plug is available from https://workspace.nottingham.ac.uk/display/ISVLEI/?????????
+1.  Latest version of the zipped file for this plug is available from https://github.com/bencellis/moodle-local_servercron
 
-2.  Unzip the zipped file somewhere on your local computer
+2.  Unzip the zipped file somewhere on your local computer and rename the folder bencellis-moodle-local_servercron-xxxxxx to servercron
 
 3.  Upload the unzipped folder to /local/ folder in the moodle root folder e.g /var/www/html/ on each of the Moodle servers
 

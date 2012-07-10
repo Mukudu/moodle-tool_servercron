@@ -15,13 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Server Cron Jobs Settings Page
+ * Server Crons Settings Page
  *
- * add a menu option to manage Server Cron Jobs Settings Page - Administartion->Server
+ * add a menu option to manage Server Cron Jobs Page - Administartion->Server
  *
  * @package    local_servercron
  * @copyright  2012 Nottingham University
- * @author     Benjamin Ellis - benjamin.ellis@nottingham.ac.uk
+ * @author     Benjamin Ellis <benjamin.c.ellis@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
