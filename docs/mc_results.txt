@@ -1,6 +1,0 @@
-local/servercron/db/install.php
-local/servercron/index.php
-local/servercron/lang/en/local_servercron.php
-local/servercron/servercron_form.php
-local/servercron/settings.php
-local/servercron/version.php
