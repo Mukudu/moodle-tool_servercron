@@ -17,7 +17,7 @@
 /**
  * Plugin to manage the http cron jobs for moodle - english language file
  *
- * @package    local_servercron
+ * @package    tool_servercron
  * @copyright  2012 Nottingham University
  * @author     Benjamin Ellis <benjamin.c.ellis@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

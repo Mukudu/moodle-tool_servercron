@@ -19,7 +19,7 @@
  *
  * add a menu option to manage Server Cron Jobs Page - Administartion->Server
  *
- * @package    local_servercron
+ * @package    tool_servercron
  * @copyright  2012 Nottingham University
  * @author     Benjamin Ellis <benjamin.c.ellis@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -28,9 +28,9 @@
 defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) { // needs this condition or there is error on login page
-    if (!$ADMIN->add('server', new admin_externalpage('local_servercron',
-            get_string('pluginname', 'local_servercron'),
-            new moodle_url($CFG->wwwroot.'/local/servercron/index.php')))) {
+    if (!$ADMIN->add('server', new admin_externalpage('tool_servercron',
+            get_string('pluginname', 'tool_servercron'),
+            new moodle_url($CFG->wwwroot.'/admin/tool/servercron/index.php')))) {
         debugging('Failed to add menu Item', DEBUG_DEVELOPER);
     }
 }

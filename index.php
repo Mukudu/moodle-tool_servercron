@@ -19,7 +19,7 @@
  *
  * Plugin to manage the http cron jobs for Moodle
  *
- * @package    local_servercron
+ * @package    tool_servercron
  * @copyright  2012 Nottingham University
  * @author     Benjamin Ellis <benjamin.c.ellis@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -27,12 +27,12 @@
  * @throws $moodle_exception via print_error
  */
 
-require('../../config.php');            //this works everytime - the one in the coding guide does not if moodle is not in the root
-//require(dirname(dirname(__FILE__)) . '/config.php');
+require('../../../config.php');            //this works everytime - the one in the coding guide does not if moodle is not in the root
+//require(dirname(dirname(dirname(__FILE__))) . '/config.php');
 
 //check that we are on a suitable OS
 if (stripos(php_uname('s'), 'windows') !== false) {              //no windows
-    print_error('wrong_os', 'local_servercron', new moodle_url('/'), php_uname('s'));
+    print_error('wrong_os', 'tool_servercron', new moodle_url('/'), php_uname('s'));
 }
 
 require_once('servercron_form.php');
@@ -41,12 +41,12 @@ require_login();
 require_capability('moodle/site:config', get_context_instance(CONTEXT_SYSTEM));
 
 $PAGE->set_context(get_context_instance(CONTEXT_SYSTEM));
-$PAGE->set_url(new moodle_url('/local/servercron/index.php'));
+$PAGE->set_url(new moodle_url('/admin/tool/servercron/index.php'));
 $PAGE->set_heading($SITE->fullname);
 $PAGE->set_pagelayout('admin');
 
-$PAGE->set_title(get_string('servercronpagetitle', 'local_servercron'));
-$PAGE->navbar->add(get_string('servercronpagecrumb', 'local_servercron'));
+$PAGE->set_title(get_string('servercronpagetitle', 'tool_servercron'));
+$PAGE->navbar->add(get_string('servercronpagecrumb', 'tool_servercron'));
 
 $paramerror = '';
 
@@ -68,7 +68,7 @@ $cmd = exec('which crontab') . ' -l';
 exec($cmd, $cronlines, $result);
 
 if ($result !== 0) {          //we have an error - 0 = success anything else is error
-    print_error('nocronlines', 'local_servercron', $PAGE->url->out(), null, $result);       //this will throw exception
+    print_error('nocronlines', 'tool_servercron', $PAGE->url->out(), null, $result);       //this will throw exception
 } else {
     foreach ($cronlines as $cronline) {
         if (!(preg_match('/^#/', $cronline))) { //if not a comment
@@ -99,8 +99,8 @@ if ($theaction) {
         }
         fclose($fh);
     } else {
-        //$noerror = servercron_error(get_string('bkupfilefail', 'local_servercron') . " - $CFG->dataroot");
-        print_error('bkupfilefail', 'local_servercron', $PAGE->url->out(), null, $result);      //another possibe exception
+        //$noerror = servercron_error(get_string('bkupfilefail', 'tool_servercron') . " - $CFG->dataroot");
+        print_error('bkupfilefail', 'tool_servercron', $PAGE->url->out(), null, $result);      //another possibe exception
     }
 
     if ($theaction == 'edit') {
@@ -133,7 +133,7 @@ if ($theaction) {
             $formdata['existingrecs'] = $editinglines;
 
         } else {
-            $paramerror = get_string('croniderror', 'local_servercron');
+            $paramerror = get_string('croniderror', 'tool_servercron');
         }
     } else if ($theaction == 'save') {             // save details
         //if saving
@@ -150,31 +150,31 @@ if ($theaction) {
 
             //verify the timings data that has been submitted
             if (($ret = servercron_checktimeinput($data->minute, 0, 59, PARAM_INT)) !== true) {
-                $paramerror .= get_string('minuteprompt', 'local_servercron') .': ' . $ret;
+                $paramerror .= get_string('minuteprompt', 'tool_servercron') .': ' . $ret;
             } else {
                 $data->minute = implode(', ', $data->minute);
             }
 
             if (($ret = servercron_checktimeinput($data->hour, 0, 23, PARAM_INT)) !== true) {
-                $paramerror .= get_string('hourprompt', 'local_servercron') .': ' . $ret;
+                $paramerror .= get_string('hourprompt', 'tool_servercron') .': ' . $ret;
             } else {
                 $data->hour = implode(', ', $data->hour);
             }
 
             if (($ret = servercron_checktimeinput($data->day, 1, 31, PARAM_INT)) !== true) {
-                $paramerror .= get_string('dayprompt', 'local_servercron') .': ' . $ret;
+                $paramerror .= get_string('dayprompt', 'tool_servercron') .': ' . $ret;
             } else {
                 $data->day = implode(', ', $data->day);
             }
 
             if (($ret = servercron_checktimeinput($data->month, 1, 12, PARAM_INT)) !== true) {
-                $paramerror .= get_string('monthprompt', 'local_servercron') .': ' . $ret;
+                $paramerror .= get_string('monthprompt', 'tool_servercron') .': ' . $ret;
             } else {
                 $data->month = implode(', ', $data->month);
             }
 
             if (($ret = servercron_checktimeinput($data->wday, 0, 6, PARAM_INT)) !== true) {
-                $paramerror .= get_string('wdayprompt', 'local_servercron') .': ' . $ret;
+                $paramerror .= get_string('wdayprompt', 'tool_servercron') .': ' . $ret;
             } else {
                 $data->wday = implode(', ', $data->wday);
             }
@@ -193,14 +193,14 @@ if ($theaction) {
             //save to database or complain about error
             if (!$paramerror) {
                 if (!servercron_savecron($formdata['existingrecs'])) {           //attempt to install the cron jobs
-                    $paramerror = get_string('cronsaveerror', 'local_servercron');
+                    $paramerror = get_string('cronsaveerror', 'tool_servercron');
                 }
             }
         }   //otherwise edit was cancelled
 
     } else if ($theaction == 'delete') {
         if ($cronjobid) {
-            //$DB->delete_records('local_servercron', array('id' => $cronjobid));
+            //$DB->delete_records('tool_servercron', array('id' => $cronjobid));
             $newrecs = array();
             foreach ($formdata['existingrecs'] as $rec) {
                 if ($rec->id != $cronjobid) {
@@ -211,10 +211,10 @@ if ($theaction) {
                 }
             }
             if (!servercron_savecron($newrecs)) {           //attempt to install the cron jobs
-                $paramerror = get_string('cronsaveerror', 'local_servercron');
+                $paramerror = get_string('cronsaveerror', 'tool_servercron');
             }
         } else {
-            $paramerror = get_string('croniderror', 'local_servercron');
+            $paramerror = get_string('croniderror', 'tool_servercron');
         }
     }
 
@@ -245,7 +245,7 @@ $wmform = new servercron_form(null, $formdata);
 echo $OUTPUT->header();
 
 // content
-echo $OUTPUT->heading(get_string('servercronpagetitle', 'local_servercron'), 2, 'main');
+echo $OUTPUT->heading(get_string('servercronpagetitle', 'tool_servercron'), 2, 'main');
 
 $wmform->display();
 
@@ -273,7 +273,7 @@ function servercron_savecron(array $newcrons) {
         if ($cronfile = fopen($temp_file, 'wb')) {
 
             if (count($newcrons)) {
-                fwrite($cronfile, '#' . get_string('file_warning', 'local_servercron') . "\n");  //write warning notice
+                fwrite($cronfile, '#' . get_string('file_warning', 'tool_servercron') . "\n");  //write warning notice
             }
 
             foreach ($newcrons as $cronjob) {
@@ -291,15 +291,15 @@ function servercron_savecron(array $newcrons) {
             exec($cmd, $theoutput, $result);
 
             if ($result) {          //there is an error condition - 0 is successful completion unless its perl ;)
-                $noerror = servercron_error(get_string('croninstallfail', 'local_servercron') . ' - ' . $theoutput);
+                $noerror = servercron_error(get_string('croninstallfail', 'tool_servercron') . ' - ' . $theoutput);
             }
             unlink($temp_file);
 
         } else {
-            $noerror = servercron_error(get_string('tmpfilefail', 'local_servercron'));
+            $noerror = servercron_error(get_string('tmpfilefail', 'tool_servercron'));
         }
     } else {
-        $noerror = servercron_error(get_string('tmpfilecreatefail', 'local_servercron'));
+        $noerror = servercron_error(get_string('tmpfilecreatefail', 'tool_servercron'));
     }
 
     return $noerror;
@@ -350,11 +350,11 @@ function servercron_checktimeinput($tarray, $min, $max, $type) {
                 (int) $tval;
                 if ($tval = clean_param($tval, $type)) {   //check our input
                     if (!($tval >= $min) && ($tval <= $max)) {
-                        $errstr = get_string('valueoutsiderange', 'local_servercron');
+                        $errstr = get_string('valueoutsiderange', 'tool_servercron');
                         break;
                     }
                 } else {
-                    $errstr = get_string('valuenotnumber', 'local_servercron');
+                    $errstr = get_string('valuenotnumber', 'tool_servercron');
                     break;
                 }
             }

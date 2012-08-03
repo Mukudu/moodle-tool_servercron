@@ -20,7 +20,7 @@
  * Plugin to manage the http cron jobs for moodle
  * This script is run at installation and sets up the plugin for use
  *
- * @package    local_servercron
+ * @package    tool_servercron
  * @copyright  2012 Nottingham University
  * @author     Benjamin Ellis <benjamin.c.ellis@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -29,19 +29,19 @@
  */
 
 /**
- * xmldb_local_servercron_install
+ * xmldb_tool_servercron_install
  * Code called directly when the plugin is installed for the 1st time
  * checks for installation on windows and throws exception via print_error
  *
  * @throws moodleexection.
  * @return null
  */
-function xmldb_local_servercron_install() {
+function xmldb_tool_servercron_install() {
     global $DB;
 
     //check that we are on a suitable OS
     if (stripos(php_uname('s'), 'windows') !== false) {              //no windows
-        print_error('wrong_os', 'local_servercron', new moodle_url('/'), php_uname('s'));
+        print_error('wrong_os', 'tool_servercron', new moodle_url('/'), php_uname('s'));
     }
 }
 

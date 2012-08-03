@@ -10,9 +10,9 @@ You must have access to the server containing Moodle. This can be direct access,
 
 INSTALLATION
 ============
-1.  Latest version of the zipped file for this plug is available from https://github.com/bencellis/moodle-local_servercron
+1.  Latest version of the zipped file for this plug is available from https://github.com/bencellis/moodle-tool_servercron
 
-2.  Unzip the zipped file somewhere on your local computer and rename the folder bencellis-moodle-local_servercron-xxxxxx to servercron
+2.  Unzip the zipped file somewhere on your local computer and rename the folder bencellis-moodle-tool_servercron-xxxxxx to servercron
 
 3.  Upload the unzipped folder to /local/ folder in the moodle root folder e.g /var/www/html/ on each of the Moodle servers
 
@@ -33,6 +33,6 @@ UNINSTALLATION
 
 2.  Select 'Continue' on the next page
 
-3.  Delete the relevant folder /local/servercron from the moodle root e.g. /var/www/html/blocks/servercron then select Continue in the browser.
+3.  Delete the relevant folder /admin/tool/servercron from the moodle root e.g. /var/www/html/blocks/servercron then select Continue in the browser.
 
 4.  The plugin should no longer appear in the list.

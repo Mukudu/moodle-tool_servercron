@@ -19,7 +19,7 @@
  *
  * Plugin to manage the http cron jobs for moodle
  *
- * @package    local_servercron
+ * @package    tool_servercron
  * @copyright  2012 Nottingham University
  * @author     Benjamin Ellis <benjamin.c.ellis@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -27,7 +27,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'local_servercron';
+$plugin->component = 'tool_servercron';
 $plugin->version = 2012042705;          //removed database - direct cron manipulation
 $plugin->requires = 2011070100; // (Moodle 2.1 = 2011070100; Moodle 2.2 = 2011120100)
 

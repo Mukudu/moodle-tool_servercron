@@ -19,7 +19,7 @@
  *
  * Plugin to manage the http cron jobs for moodle
  *
- * @package    local_servercron
+ * @package    tool_servercron
  * @copyright  2012 Nottingham University
  * @author     Benjamin Ellis <benjamin.c.ellis@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -45,32 +45,32 @@ class servercron_form extends moodleform {
         $mform =& $this->_form;
 
         //edit section
-        $mform->addElement('header', 'configheader', get_string('exitingcrontitle', 'local_servercron'));
+        $mform->addElement('header', 'configheader', get_string('exitingcrontitle', 'tool_servercron'));
 
         $existing = $this->_customdata['existingrecs'];
         $rows = '';
 
         if (count($existing)) {
             //set up heading for the table
-            $row = html_writer::tag('th', get_string('minuteprompt', 'local_servercron'),
+            $row = html_writer::tag('th', get_string('minuteprompt', 'tool_servercron'),
                 array('width' => '5%', 'style' => 'padding:5px; text-align:right'));
 
-            $row .= html_writer::tag('th', get_string('hourprompt', 'local_servercron'),
+            $row .= html_writer::tag('th', get_string('hourprompt', 'tool_servercron'),
                 array('width' => '5%', 'style' => 'padding:5px; text-align:right'));
 
-            $row .= html_writer::tag('th', get_string('dayprompt', 'local_servercron'),
+            $row .= html_writer::tag('th', get_string('dayprompt', 'tool_servercron'),
                 array('width' => '5%', 'style' => 'padding:5px; text-align:right'));
 
-            $row .= html_writer::tag('th', get_string('monthprompt', 'local_servercron'),
+            $row .= html_writer::tag('th', get_string('monthprompt', 'tool_servercron'),
                 array('width' => '5%', 'style' => 'padding:5px; text-align:right'));
 
-            $row .= html_writer::tag('th', get_string('wdayprompt', 'local_servercron'),
+            $row .= html_writer::tag('th', get_string('wdayprompt', 'tool_servercron'),
                 array('width' => '5%', 'style' => 'padding:5px; text-align:right'));
 
-            $row .= html_writer::tag('th', get_string('commandprompt', 'local_servercron'),
+            $row .= html_writer::tag('th', get_string('commandprompt', 'tool_servercron'),
                 array('width' => '30%', 'style' => 'padding:5px; text-align:center'));
 
-            $row .= html_writer::tag('th', get_string('actionsprompt', 'local_servercron'),
+            $row .= html_writer::tag('th', get_string('actionsprompt', 'tool_servercron'),
                 array('style' => 'padding:5px; text-align:center'));
 
             $row = html_writer::tag('tr', $row, array('width' => '100%'));
@@ -88,13 +88,13 @@ class servercron_form extends moodleform {
                 //editing links
                 $row .= html_writer::start_tag('td', array('style' => 'padding:5px; text-align:center'));
 
-                $row .= html_writer::tag('a', '['.get_string('editcronjob', 'local_servercron').']',
+                $row .= html_writer::tag('a', '['.get_string('editcronjob', 'tool_servercron').']',
                     array('id' => 'svrcrn'.$exists->id,
                         'href' => $PAGE->url."?action=edit&cronjobid=".$exists->id));
 
                 $row .= '&nbsp;&nbsp;';
 
-                $row .= html_writer::tag('a', '['.get_string('deletecronjob', 'local_servercron').']',
+                $row .= html_writer::tag('a', '['.get_string('deletecronjob', 'tool_servercron').']',
                     array('id' => 'svrcrn'.$exists->id, 'href' =>  $PAGE->url."?action=delete&cronjobid=".$exists->id));
 
                 $row .= html_writer::end_tag('td');
@@ -107,7 +107,7 @@ class servercron_form extends moodleform {
         } else {
             //if no rec id specified - then we have no records
             if (!$this->_customdata['cronjobid']) {
-                $mform->addElement('html', html_writer::tag('p', get_string('noexistingcrons', 'local_servercron')));
+                $mform->addElement('html', html_writer::tag('p', get_string('noexistingcrons', 'tool_servercron')));
             }
         }
 
@@ -117,10 +117,10 @@ class servercron_form extends moodleform {
         }
         //new section
         if ($editing) {
-            $mform->addElement('header', 'configheader', get_string('editcronstitle', 'local_servercron') .' [' .
+            $mform->addElement('header', 'configheader', get_string('editcronstitle', 'tool_servercron') .' [' .
                 $this->_customdata['cronjobid'] . ']' );
         } else {
-            $mform->addElement('header', 'configheader', get_string('newcronstitle', 'local_servercron'));
+            $mform->addElement('header', 'configheader', get_string('newcronstitle', 'tool_servercron'));
         }
 
         if (isset($this->_customdata['error'])) {
@@ -134,27 +134,27 @@ class servercron_form extends moodleform {
 
         $timingdets=array();
 
-        $select = $mform->createElement('select', 'minute', get_string('minuteprompt', 'local_servercron'),
+        $select = $mform->createElement('select', 'minute', get_string('minuteprompt', 'tool_servercron'),
             $this->_customdata['minutes']);
         $select->setMultiple(true);
         $timingdets[] = $select;
 
-        $select = $mform->createElement('select', 'hour', get_string('hourprompt', 'local_servercron'),
+        $select = $mform->createElement('select', 'hour', get_string('hourprompt', 'tool_servercron'),
             $this->_customdata['hours']);
         $select->setMultiple(true);
         $timingdets[] = $select;
 
-        $select = $mform->createElement('select', 'day', get_string('dayprompt', 'local_servercron'),
+        $select = $mform->createElement('select', 'day', get_string('dayprompt', 'tool_servercron'),
             $this->_customdata['days']);
         $select->setMultiple(true);
         $timingdets[] = $select;
 
-        $select = $mform->createElement('select', 'month', get_string('monthprompt', 'local_servercron'),
+        $select = $mform->createElement('select', 'month', get_string('monthprompt', 'tool_servercron'),
             $this->_customdata['months']);
         $select->setMultiple(true);
         $timingdets[] = $select;
 
-        $select = $mform->createElement('select', 'wday', get_string('wdayprompt', 'local_servercron'),
+        $select = $mform->createElement('select', 'wday', get_string('wdayprompt', 'tool_servercron'),
             $this->_customdata['wdays']);
         $select->setMultiple(true);
         $timingdets[] = $select;
@@ -191,22 +191,22 @@ class servercron_form extends moodleform {
         }
 
         //now add the group to the form
-        $mform->addGroup($timingdets, 'timings', get_string('timingsprompt', 'local_servercron'), array(' '), false);
+        $mform->addGroup($timingdets, 'timings', get_string('timingsprompt', 'tool_servercron'), array(' '), false);
 
         //servercron title
-        $mform->addElement('text', 'commandline', get_string('commandprompt', 'local_servercron'), array('size' => 100));
+        $mform->addElement('text', 'commandline', get_string('commandprompt', 'tool_servercron'), array('size' => 100));
         $mform->setDefault('commandline', $this->_customdata['commandline']);
         $mform->setType('commandline', PARAM_TEXT);
 
         //buttons
         $buttonarray=array();
-        $buttonarray[] = $mform->createElement('submit', 'save', get_string('cronjobsave', 'local_servercron'));
+        $buttonarray[] = $mform->createElement('submit', 'save', get_string('cronjobsave', 'tool_servercron'));
 
         if ($editing) {
-            $buttonarray[] = $mform->createElement('cancel', 'cancel', get_string('croneditcancel', 'local_servercron'));
+            $buttonarray[] = $mform->createElement('cancel', 'cancel', get_string('croneditcancel', 'tool_servercron'));
         }
 
-        $buttonarray[] = $mform->createElement('reset', 'resetbutton', get_string('cronjobreset', 'local_servercron'));
+        $buttonarray[] = $mform->createElement('reset', 'resetbutton', get_string('cronjobreset', 'tool_servercron'));
         $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
 
     }
